@@ -7,23 +7,16 @@
 
 // Access from ARM Running Linux
 
-#define BCM2708_PERI_BASE        0x20000000
-#define GPIO_BASE                (BCM2708_PERI_BASE + 0x200000) /* GPIO controller */
+#define BCM2708_PERI_BASE    0x20000000
 
+/* GPIO controller */
+#define GPIO_BASE            (BCM2708_PERI_BASE + 0x200000) 
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <dirent.h>
-#include <fcntl.h>
-#include <assert.h>
 #include <unistd.h>
-#include <sys/mman.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/time.h>
 #include <bcm2835.h>
-#include <unistd.h>
 
 #define MAXTIMINGS 100
 
@@ -38,29 +31,33 @@ int readDHT(int type, int pin);
 int main(int argc, char **argv)
 {
   if (!bcm2835_init())
-        return 1;
+    return 1;
 
   if (argc != 3) {
-	printf("usage: %s [11|22|2302] GPIOpin#\n", argv[0]);
-	printf("example: %s 2302 4 - Read from an AM2302 connected to GPIO #4\n", argv[0]);
-	return 2;
+    printf("usage: %s [11|22|2302] GPIOpin#\n", argv[0]);
+    printf(
+      "example: %s 2302 4 - Read from an AM2302 connected to GPIO #4\n", 
+      argv[0]
+    );
+    return 2;
   }
+
   int type = 0;
   if (strcmp(argv[1], "11") == 0) type = DHT11;
   if (strcmp(argv[1], "22") == 0) type = DHT22;
   if (strcmp(argv[1], "2302") == 0) type = AM2302;
+
   if (type == 0) {
-	printf("Select 11, 22, 2302 as type!\n");
-	return 3;
+    printf("Select 11, 22, 2302 as type!\n");
+    return 3;
   }
   
   int dhtpin = atoi(argv[2]);
 
   if (dhtpin <= 0) {
-	printf("Please select a valid GPIO pin #\n");
-	return 3;
+    printf("Please select a valid GPIO pin #\n");
+    return 3;
   }
-
 
   printf("Using pin #%d\n", dhtpin);
   readDHT(type, dhtpin);
@@ -95,14 +92,15 @@ int readDHT(int type, int pin) {
   }
 
   // read data!
-  for (int i=0; i< MAXTIMINGS; i++) {
+  for (int i=0; i < MAXTIMINGS; i++) {
+
     counter = 0;
-    while ( bcm2835_gpio_lev(pin) == laststate) {
-	counter++;
-	//nanosleep(1);		// overclocking might change this?
-        if (counter == 1000)
-	  break;
+    while (bcm2835_gpio_lev(pin) == laststate) {
+      counter++;
+      if (counter == 1000)
+        break;
     }
+
     laststate = bcm2835_gpio_lev(pin);
     if (counter == 1000) break;
     bits[bitidx++] = counter;
@@ -116,7 +114,6 @@ int readDHT(int type, int pin) {
     }
   }
 
-
 #ifdef DEBUG
   for (int i=3; i<bitidx; i+=2) {
     printf("bit %d: %d\n", i-3, bits[i]);
@@ -124,22 +121,27 @@ int readDHT(int type, int pin) {
   }
 #endif
 
-  printf("Data (%d): 0x%x 0x%x 0x%x 0x%x 0x%x\n", j, data[0], data[1], data[2], data[3], data[4]);
+  printf(
+    "Data (%d): 0x%x 0x%x 0x%x 0x%x 0x%x\n", 
+    j, data[0], data[1], data[2], data[3], data[4]
+  );
 
-  if ((j >= 39) &&
-      (data[4] == ((data[0] + data[1] + data[2] + data[3]) & 0xFF)) ) {
-     // yay!
-     if (type == DHT11)
-	printf("Temp = %d *C, Hum = %d \%\n", data[2], data[0]);
-     if (type == DHT22) {
-	float f, h;
-	h = data[0] * 256 + data[1];
-	h /= 10;
+  if ((j >= 39) && 
+      (data[4] == ((data[0] + data[1] + data[2] + data[3]) & 0xFF))) 
+  {
+   // yay!
+   if (type == DHT11)
+    printf("Temp = %d *C, Hum = %d \%\n", data[2], data[0]);
 
-	f = (data[2] & 0x7F)* 256 + data[3];
-        f /= 10.0;
-        if (data[2] & 0x80)  f *= -1;
-	printf("Temp =  %.1f *C, Hum = %.1f \%\n", f, h);
+   if (type == DHT22) {
+    float f, h;
+    h = data[0] * 256 + data[1];
+    h /= 10;
+
+    f = (data[2] & 0x7F)* 256 + data[3];
+    f /= 10.0;
+    if (data[2] & 0x80)  f *= -1;
+      printf("Temp =  %.1f *C, Hum = %.1f \%\n", f, h);
     }
     return 1;
   }
