@@ -1,19 +1,25 @@
-#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
 #include "gpio.h"
 
-bool readDHT11(int pin, int *celsius, int *rh);
+#include "dht11.h"
+#include <stdio.h>
+#include <stdbool.h>
 
 int main(int argc, char **argv)
 {
   gpio_init();
   int celsius, rh;
-  if (readDHT11(4, &celsius, &rh)) {
-    printf("%d degC %d%%\n", celsius, rh);
-  } else {
-    printf("CSUM fail\n");
+
+  bool done = false;
+  while (!done) {  
+    if (readDHT11(4, &celsius, &rh)) {
+      printf("T:%d RH:%d\n", celsius, rh);
+      done = true;
+    } else {
+      sleep(2);
+    }
   }
   return 0;
 }
