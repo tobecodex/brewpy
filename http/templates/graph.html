@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+<head>
+<script type="text/javascript"
+  src="/static/dygraph-combined.js"></script>
+</head>
+<body>
+<div align="center">
+<div id="graphdiv"></div>
+</div>
+<script type="text/javascript">
+  g = new Dygraph(
+    // containing div
+    document.getElementById("graphdiv"),
+    // CSV or path to a CSV file.
+    "{{ series }}", {
+      title: "Room Conditions",
+      legend: "always",
+      labels : [ "Date", "Temp", "RH" ],
+      ylabel: "Temperature",
+      y2label: "Relative Humidity",
+      series : {
+        'Temp': {
+           axis: 'y'
+        },
+        'RH': {
+          axis: 'y2'
+        }
+      },
+      rollupPeriod: 3
+    }
+  );
+  g.resize(600, 400);
+</script>
+</body>
+</html>

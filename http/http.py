@@ -12,6 +12,19 @@ def root():
     print "Exception", e
     return e
 
+@app.route('/graph')
+def graph(name=None):
+  series = ""
+  lines = file("/var/log/dht11.log").readlines()
+  for line in lines:
+    try:
+      d,tm,t,h = line.split()
+    except:
+      continue
+    tm = d + " " + tm
+    series += tm + "," + t.split(":")[1] + "," + h.split(":")[1] + "\\n"
+  return render_template('graph.html', series=series)
+
 def init():
   # use P1 header pin numbering convention
   GPIO.setmode(GPIO.BOARD)
