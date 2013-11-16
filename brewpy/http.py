@@ -18,11 +18,11 @@ def graph(name=None):
   lines = file("/var/log/dht11.log").readlines()
   for line in lines:
     try:
-      d,tm,t,h = line.split()
+      d,t,rh,h = line.split()
     except:
       continue
-    tm = d + " " + tm
-    series += tm + "," + t.split(":")[1] + "," + h.split(":")[1] + "\\n"
+     
+    series += tm + "," + t.split(":")[1] + "," + rh.split(":")[1] + "," + h + "\\n"
   return render_template('graph.html', series=series)
 
 def init():
