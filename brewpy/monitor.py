@@ -11,11 +11,10 @@ def run():
   GPIO.setup(__PIN_HEATER, GPIO.OUT)
 
   # Read from dht-11, operate heater
-  stdout = subprocess.check_output(["dht-11"]).strip()
+  stdout = subprocess.check_output(["/usr/local/sbin/dht-11"]).strip()
   temp, rh = stdout.split(',')
-  heater_on = (int(temp) <= 15)
+  heater_on = (int(temp) <= 17)
   GPIO.output(__PIN_HEATER, not heater_on)
-  print heater_on
 
   # Log what happened
   data = [ datetime.datetime.now().isoformat(), temp, rh, str(int(heater_on)) ]

@@ -6,23 +6,14 @@ app = Flask(__name__)
 @app.route('/')
 def root():
   try:
-    return redirect(url_for("static", filename="index.html"))
-    return render_template(url_for("static", filename="index.html"))
+    return redirect("/graph")
   except Exception as e:
     print "Exception", e
     return e
 
 @app.route('/graph')
 def graph(name=None):
-  series = ""
-  lines = file("/var/log/dht11.log").readlines()
-  for line in lines:
-    try:
-      d,t,rh,h = line.split()
-    except:
-      continue
-     
-    series += tm + "," + t.split(":")[1] + "," + rh.split(":")[1] + "," + h + "\\n"
+  series = file("/var/log/dht11.log").read().replace("\n", "\\n")
   return render_template('graph.html', series=series)
 
 def init():

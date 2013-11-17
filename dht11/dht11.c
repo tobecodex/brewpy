@@ -15,7 +15,7 @@ int main(int argc, char **argv)
   bool done = false;
   while (!done) {  
     if (readDHT11(4, &celsius, &rh)) {
-      printf("T:%d RH:%d\n", celsius, rh);
+      printf("%d,%d\n", celsius, rh);
       done = true;
     } else {
       sleep(2);
