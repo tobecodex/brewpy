@@ -1,0 +1,1 @@
+  * *  *   *   *     python /home/tobe/src/rpi/brewpy/monitor.py >> /var/log/dht11.log
