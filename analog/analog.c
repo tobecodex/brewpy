@@ -4,17 +4,20 @@
 #include <stdio.h>
 #include <unistd.h>
 
+/*
+  Measure analog Ω, C or V on a single digital pin by charging an RC
+  network. Pin goes high at 1.3v.
+*/
+
+static int PIN = 23;
+static double CAP_VALUE = 1e-6;
+
 double readAnalog(int pin);
 
 int main(int argc, char **argv)
 {
   gpio_init();
-
-  bool done = false;
-  while (!done) {
-    printf("%d\n", (int)readAnalog(23));
-    sleep(2);
-  }
+  printf("%d\n", (int)readAnalog(PIN));
   return 0;
 }
 
@@ -37,11 +40,8 @@ double readAnalog(int pin) {
     ((begin.tv_sec * 1e9) + (begin.tv_nsec));
   t = t / 1e9;
 
-  // C in Farads
-  double C = 0.000001;
-  
-  // t = RC/2 (1.3v threshold, 3.3v limit, 40% = RC/2)
-  double R = (2 * t) / C;
+  // t = RC/2 (since V is 3.3v, 40% = RC/2)
+  double R = (2 * t) / CAP_VALUE;
 
   return R;
 }
