@@ -5,31 +5,42 @@ import RPi.GPIO as GPIO
 from operator import itemgetter
 
 __PIN_HEATER = 23
-__PIN_THERMISTOR = 23
+__PIN_THERMISTOR = 24
+
+def read_resistance():
+  stdout = subprocess.check_output(["/usr/local/sbin/analog"]).strip()
+  return int(stdout)
 
 def read_thermistor():
+
+  R = read_resistance()
+
   curve = []
   values = open("curve.csv").readlines()
   for value in values:
-    t, r = value.split(",")
-    curve.append((int(r.strip()), int(t)))
+    f, c, r = value.split()
+    curve.append((int(r.strip()), float(c)))
   curve.sort(key = itemgetter(0))
 
-  stdout = subprocess.check_output(
-    ["/usr/local/sbin/analog", __PIN_THERMISTOR]
-  ).strip()
-  r = int(stdout)
+  # Now use the thermistor curve
+  # to work out temp.
 
   i = 0
-  while i < len(curve) and r > curve[i][0]:
+  for point in curve:
+    if R < point[0]:
+      break
     i += 1
 
-  if i == 0 or i >= len(curve):
-    return None
+  # lerp is good enough
+ 
+  r0 = curve[i - 1][0]
+  r1 = curve[i][0]
+  mu = (R - r0) / float(r1 - r0)
   
-  d = curve[i][0] - r
-  dT = curve[i][0] - curve[i - 1][0]
-  t = curve[i][1] + (1 * (d / float(dT)))
+  t0 = curve[i - 1][1]
+  t1 = curve[i][1]
+  
+  t = round(t0 + (mu * (t1 - t0)), 2)
   return t
 
 def run():
@@ -37,14 +48,18 @@ def run():
   GPIO.setmode(GPIO.BCM)
   GPIO.setup(__PIN_HEATER, GPIO.OUT)
 
-  # Read from dht-11, operate heater
-  stdout = subprocess.check_output(["/usr/local/sbin/dht-11"]).strip()
-  temp, rh = stdout.split(',')
-  heater_on = (int(temp) < 21)
+  temp = read_thermistor()
+  # print str(temp) + " degC"
+
+  heater_on = (int(temp) > 21)
   GPIO.output(__PIN_HEATER, not heater_on)
 
   # Log what happened
-  data = [ datetime.datetime.now().isoformat(), temp + "DegC", rh + "%", str(int(heater_on)) ]
+  data = [ 
+    datetime.datetime.now().isoformat(), 
+    str(temp), 
+    str(int(heater_on)) 
+  ]
   print ",".join(data)
 
 if __name__ == "__main__":

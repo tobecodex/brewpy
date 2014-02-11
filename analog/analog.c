@@ -9,7 +9,7 @@
   network. Pin goes high at 1.3v.
 */
 
-static int PIN = 23;
+static int PIN = 24;
 static double CAP_VALUE = 1e-6;
 
 double readAnalog(int pin);
@@ -34,6 +34,7 @@ double readAnalog(int pin) {
   gpio_setup(pin, GPIO_INP);
   gpio_expect(pin, GPIO_HI, 0); 
   clock_gettime(CLOCK_REALTIME, &end);
+  gpio_setup(pin, GPIO_OUT);
 
   // t in seconds
   double t = ((end.tv_sec * 1e9) + end.tv_nsec) - 
