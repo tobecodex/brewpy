@@ -13,7 +13,7 @@ def root():
 
 @app.route('/graph')
 def graph(name=None):
-  series = file("/var/log/dht11.log").read().replace("\n", "\\n")
+  series = file("/var/log/analog.log").read().replace("\n", "\\n")
   return render_template('graph.html', series=series)
 
 def init():
