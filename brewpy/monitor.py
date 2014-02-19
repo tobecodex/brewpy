@@ -53,7 +53,7 @@ def run():
   temp = read_thermistor()
   # print str(temp) + " degC"
 
-  heater_on = (int(temp) > 21)
+  heater_on = False #(int(temp) < 21)
   GPIO.output(__PIN_HEATER, not heater_on)
 
   # Log what happened

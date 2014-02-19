@@ -13,14 +13,9 @@
     // containing div
     document.getElementById("graphdiv"),
     // CSV or path to a CSV file.
-    "Date,Temp,Heater\n{{ series }}", {
+    "Date,Temp, Heater\n{{ series }}", {
       title : "Room",
-      legend : 'always',
-      series : {
-        Heater : {
-          axis: 'y2'
-        },
-      }
+      legend : 'always'
     }
   );
   g.resize(600, 400);
