@@ -13,13 +13,20 @@
   </form>
 </div>
 </div>
+<div align="center">
+<form action="update_temp" method="POST">
+  <label for="temp">Target Temp:</label>
+  <input type="text" value="{{ target_temp }}" name="target_temp" size="2" style="text-align: right"/>
+  <input type="submit" value="Update Temp"/>
+</form>
+</div>
 <script type="text/javascript">
   g = new Dygraph(
     // containing div
     document.getElementById("graphdiv"),
     // CSV or path to a CSV file.
     "Date,Temp, Heater\n{{ series }}", {
-      title : "Room",
+      title : "brewpy",
       legend : 'always'
     }
   );

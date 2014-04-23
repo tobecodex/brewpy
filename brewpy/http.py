@@ -1,10 +1,17 @@
-import RPi.GPIO as GPIO
-
-from flask import Flask, render_template, url_for, redirect
+from flask import Flask, render_template, url_for, redirect, request
 app = Flask(__name__)
 
-import numpy
+try:
+  import numpy
+  numpy_installed = True
+except ImportError:
+  numpy_installed = False
+
 def smooth(x,window_len=7,window='flat'):
+
+    if not numpy_installed:
+      return x
+
     x = numpy.array(x)
 
     if x.ndim != 1:
@@ -23,7 +30,7 @@ def smooth(x,window_len=7,window='flat'):
     if window == 'flat': #moving average
         w = numpy.ones(window_len,'d')
     else:
-        w=eval('numpy.'+window+'(window_len)')
+        w = eval('numpy.'+window+'(window_len)')
 
     y = numpy.convolve(w/w.sum(),s,mode='valid')
     return y[(window_len/2-1):-(window_len/2)]
@@ -31,20 +38,31 @@ def smooth(x,window_len=7,window='flat'):
 
 @app.route('/')
 def root():
-  try:
-    return redirect("/graph")
-  except Exception as e:
-    print "Exception", e
-    return e
+  return redirect("/graph")
+
+@app.route('/update_temp', methods=['POST'])
+def update_temp():
+  target_temp = request.form.get("target_temp")
+  open("target_temp", "w").write(target_temp)
+  return redirect("/graph")
 
 @app.route('/graph')
 def graph(name=None):
 
+  try:
+    analog_data = file("/var/log/analog.log").readlines()
+  except IOError:
+    analog_data = []
+
   data = map(
-    lambda x : x.strip().split(","), 
-    file("/var/log/analog.log").readlines()
+    lambda x : x.strip().split(","), analog_data
   )
+
   temps = smooth(map(lambda x : float(x[1]) if len(x) > 0 else "", data))
+
+  # Read target temp
+  target_temp = int(open("target_temp").read())
+
   series = "".join(
     map(
       lambda x : ",".join(x) + "\n", 
@@ -52,11 +70,10 @@ def graph(name=None):
     )
   )
 
-  return render_template('graph.html', series=series.replace("\n", "\\n"))
+  return render_template('graph.html', series=series.replace("\n", "\\n"), target_temp=target_temp)
 
 def init():
-  # use P1 header pin numbering convention
-  GPIO.setmode(GPIO.BOARD)
+  pass
  
 if __name__ == '__main__':
   init();

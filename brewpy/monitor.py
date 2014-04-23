@@ -46,16 +46,20 @@ def read_thermistor():
   return t
 
 def run():
+
   # Setup
   GPIO.setmode(GPIO.BCM)
   GPIO.setup(__PIN_HEATER, GPIO.OUT)
+
+  # Read target temp
+  target_temp = int(open("target_temp").read())
 
   temp = read_thermistor()
   # print str(temp) + " degC"
 
   _now = datetime.datetime.now().isoformat()
   heater_on = int(_now[len(_now) - 11]) % 2 == 0
-  # heater_on = True #(int(temp) < 19)
+  # heater_on = (int(temp) < target_temp)
   GPIO.output(__PIN_HEATER, not heater_on)
 
   # Log what happened
