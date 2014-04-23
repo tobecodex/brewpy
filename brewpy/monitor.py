@@ -53,12 +53,14 @@ def run():
   temp = read_thermistor()
   # print str(temp) + " degC"
 
-  heater_on = False #(int(temp) < 21)
+  _now = datetime.datetime.now().isoformat()
+  heater_on = int(_now[len(_now) - 11]) % 2 == 0
+  # heater_on = True #(int(temp) < 19)
   GPIO.output(__PIN_HEATER, not heater_on)
 
   # Log what happened
-  data = [ 
-    datetime.datetime.now().isoformat(), 
+  data = [
+    _now,
     str(temp), 
     str(int(heater_on)) 
   ]
