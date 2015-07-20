@@ -1,11 +1,13 @@
 <!doctype html>
 <html>
 <head>
+<title>brewpy</title>
 <script type="text/javascript"
   src="/static/dygraph-combined.js"></script>
 </head>
 <body>
 <div align="center">
+  <h1>{{ name }}</h1>
   <div id="graphdiv"/>
 </div>
 <div align="center">
@@ -14,6 +16,9 @@
   <input type="text" value="{{ target_temp }}" name="target_temp" size="2" style="text-align: right"/>
   <input type="submit" value="Update Temp"/>
 </form>
+</div>
+<div align="center">
+  <a href="./new_brew">New Brew</a>
 </div>
 <script type="text/javascript">
   g = new Dygraph(

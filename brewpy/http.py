@@ -1,3 +1,4 @@
+import time
 from flask import Flask, render_template, url_for, redirect, request
 app = Flask(__name__)
 
@@ -14,8 +15,12 @@ def update_temp():
 @app.route('/graph')
 def graph(name=None):
 
+  current_brew = open("current_brew", "r").read()
+  if not current_brew:
+    return redirect("new_brew")
+
   try:
-    log_data = file("/var/log/brewpy.log").readlines()
+    log_data = file("temp.log").readlines()
   except IOError:
     log_data = []
 
@@ -37,7 +42,25 @@ def graph(name=None):
     )
   )
 
-  return render_template('graph.html', series=series.replace("\n", "\\n"), target_temp=target_temp)
+  return render_template('graph.html', name=current_brew, series=series.replace("\n", "\\n"), target_temp=target_temp)
+
+@app.route('/new_brew', methods=['GET', 'POST'])
+def new_brew():
+  if request.method == "POST":
+    name = request.form.get("name")
+    og = request.form.get("og")
+    notes = request.form.get("notes")
+    _now = time.strftime("%d-%m-%Y@%H:%M")
+    fname = "brews/%s-%s.txt" % (name, _now)
+    f = open(fname, "w")
+    f.write("Name: %s\n" % name)
+    f.write("O.G: %s\n" % og)
+    f.write("Notes:%s\n" % notes)
+    f.close()
+    open("current_brew", "w").write(fname)
+
+    return redirect("/graph")
+  return render_template('new_brew.html')
 
 def init():
   pass
