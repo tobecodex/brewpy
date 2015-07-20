@@ -1,10 +1,16 @@
 #!/usr/bin/env python
 
+import sys
 import time
 import datetime
 import subprocess
 import RPi.GPIO as GPIO
 from operator import itemgetter
+
+"""
+  monitor.py - Call this program periodically to measure temperature
+  and turn heater on or off depending on contents of file target_temp
+"""
 
 __PIN_HEATER = 25
 __DEVICE_ID = "000004f926e7"
@@ -57,11 +63,7 @@ def read_ds18b20():
   temp = temp[0:2] + "." + temp[2:]
   return float(temp)
 
-def run():
-
-  # Setup
-  GPIO.setmode(GPIO.BCM)
-  GPIO.setup(__PIN_HEATER, GPIO.OUT)
+def loop():
 
   # Read target temp
   target_temp = int(open("target_temp").read())
@@ -81,5 +83,18 @@ def run():
   ]
   print ",".join(data)
 
+def main():
+
+  # Setup
+  GPIO.setmode(GPIO.BCM)
+  GPIO.setup(__PIN_HEATER, GPIO.OUT)
+  
+  while True:
+    try:
+      loop()
+    except:
+      print sys.exc_info()[0]
+    time.sleep(60)
+
 if __name__ == "__main__":
-  run()
+  main()

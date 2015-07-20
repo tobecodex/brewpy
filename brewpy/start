@@ -1,2 +1,3 @@
 cd `dirname $0`
-python ./http.py 
+python ./monitor.py &
+python ./http.py
